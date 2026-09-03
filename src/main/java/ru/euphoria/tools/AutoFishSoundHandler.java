@@ -36,6 +36,7 @@ public final class AutoFishSoundHandler {
 
     public void handle(ClientboundSoundPacket packet) {
         if (packet == null) return;
+        if (MythicalFishHandler.INSTANCE.isFighting()) return;
         long now = System.currentTimeMillis();
         if (now - lastBiteTime < 1000) return;
 
@@ -69,6 +70,7 @@ public final class AutoFishSoundHandler {
 
     public void handleSoundEntity(ClientboundSoundEntityPacket packet) {
         if (packet == null) return;
+        if (MythicalFishHandler.INSTANCE.isFighting()) return;
         long now = System.currentTimeMillis();
         if (now - lastBiteTime < 1000) return;
 
@@ -93,6 +95,7 @@ public final class AutoFishSoundHandler {
 
     public void handleSoundInstance(SoundInstance sound) {
         if (sound == null || sound.getIdentifier() == null) return;
+        if (MythicalFishHandler.INSTANCE.isFighting()) return;
         long now = System.currentTimeMillis();
         if (now - lastBiteTime < 1000) return;
 

@@ -27,6 +27,11 @@ public final class AutoFish {
 
     private void onTick(Minecraft client) {
         if (client == null) return;
+        if (MythicalFishHandler.INSTANCE.isFighting()) {
+            waitingReel = false;
+            waitingRecast = false;
+            return;
+        }
         if (!ConfigManager.INSTANCE.getConfig().getEnabled()) {
             waitingReel = false;
             waitingRecast = false;
@@ -66,6 +71,9 @@ public final class AutoFish {
     }
 
     public void onFishBite() {
+        if (MythicalFishHandler.INSTANCE.isFighting()) {
+            return;
+        }
         if (!ConfigManager.INSTANCE.getConfig().getEnabled()) {
             return;
         }

@@ -2,8 +2,8 @@
 *.class
 *.log
 release_assets/
-deploy_key
-deploy_key.pub
+deploy_key*
+*.pem
 
 # IDE & OS
 .idea/

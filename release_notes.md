@@ -20,4 +20,8 @@
   - 坐标闭环急刹控制，绝对防落水；
 - **鲁棒性断线与漏抛自愈**：
   - 处于钓鱼点持续 2 秒未检测到浮漂自动重置朝向并补抛；
+- **Hypixel 神话鱼拉扯 QTE 战斗系统 (Mythical Fish Combat)**：
+  - 深度逆向适配主大厅神话鱼（Archimedes, Aphrodite, Demeter, Helios, Hades, Nyx, Selene, Zeus 等）；
+  - 绿灯（REEL）自动 6.6 CPS 点按削减 HP，红灯（STOP）绝对停手，从根源上彻底解决**脱钩与爆竿**问题；
+  - 战斗期间自动挂起声音收抛与防 AFK 移动，捕获后自动重新抛竿恢复挂机；
 - **拟人化防封禁与 ModMenu 支持**。

@@ -19,5 +19,6 @@ public final class AutoFishClient implements ClientModInitializer {
         AutoFish.INSTANCE.init();
         AutoFishHandler.INSTANCE.init();
         ru.euphoria.tools.AutoMacro.INSTANCE.init();
+        ru.euphoria.tools.MythicalFishHandler.INSTANCE.init();
     }
 }

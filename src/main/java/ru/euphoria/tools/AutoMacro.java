@@ -308,6 +308,15 @@ public final class AutoMacro {
     }
 
     private void handleFishingState(Minecraft client, LocalPlayer player) {
+        // 如果正在进行神话鱼拉扯战斗，冻结防挂机位移和未抛竿重置，绝不打乱拉扯！
+        if (MythicalFishHandler.INSTANCE.isFighting()) {
+            this.afkTimer = 0;
+            this.noBobberTimer = 0;
+            player.setYRot(180.0f);
+            player.setXRot(-2.0f);
+            return;
+        }
+
         this.afkTimer++;
 
         // 钓鱼过程中始终锁定正北抛竿朝向 (Yaw 180.0, Pitch -2.0)
