@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "autofishplus",
+  "version": "1.0.0-1.21.11",
+  "name": "AutoFish+",
+  "description": "Client-side auto-fishing mod with anti-ban and humanized reaction delay for Minecraft 1.21.11.",
+  "authors": [
+    "euphoria_a"
+  ],
+  "license": "CC0-1.0",
+  "icon": "assets/autofishplus/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "ru.euphoria.AutoFish"
+    ],
+    "client": [
+      "ru.euphoria.client.AutoFishClient"
+    ],
+    "modmenu": [
+      "ru.euphoria.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "autofishplus.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": ">=1.21.11",
+    "java": ">=21"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "ru.euphoria.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "SoundMixin",
+    "SoundManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

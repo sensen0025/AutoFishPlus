@@ -1,0 +1,23 @@
+{
+  "keybinding.autofishplus.enabled": "Toggle AutoFish+",
+  "keybinding.autofishplus.open_config": "Open AutoFish+ Settings",
+  "key.category.autofishplus.autofish": "AutoFish+",
+  "config.autofishplus.title": "AutoFish+ Settings",
+  "config.autofishplus.general": "General",
+  "config.autofishplus.enabled": "Auto-fishing",
+  "config.autofishplus.enabled.tooltip": "Automatically reels in when a fish bites and casts again after the delay.",
+  "config.autofishplus.recast_delay": "Recast delay",
+  "config.autofishplus.recast_delay.tooltip": "Pause between reeling in and casting the rod again.",
+  "config.autofishplus.recast_delay_seconds": "sec",
+  "config.autofishplus.dont_night_fishing": "Pause at night",
+  "config.autofishplus.dont_night_fishing.tooltip": "Stops auto-fishing while the world is dark outside.",
+  "config.autofishplus.replace_rod": "Spare rod swap",
+  "config.autofishplus.replace_rod.tooltip": "Moves another fishing rod into your selected hotbar slot when the current one breaks.",
+  "config.autofishplus.done": "Save",
+  "actionbar.autofishplus.on": "enabled",
+  "actionbar.autofishplus.off": "disabled",
+  "config.autofishplus.antiban": "Human-like Anti-Ban",
+  "config.autofishplus.antiban.tooltip": "Adds realistic non-normal human reaction delay (Ex-Gaussian) and recast jitter to simulate human hands.",
+  "config.autofishplus.mouse_jitter": "Micro Mouse Jitter",
+  "config.autofishplus.mouse_jitter.tooltip": "Simulates subtle natural mouse sensor movement when pressing the right click button to evade bot heuristics."
+}

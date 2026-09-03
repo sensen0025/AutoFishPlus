@@ -1,0 +1,13 @@
+# Build and binaries
+*.class
+*.log
+release_assets/
+deploy_key
+deploy_key.pub
+
+# IDE & OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

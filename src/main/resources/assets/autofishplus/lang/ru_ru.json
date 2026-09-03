@@ -1,0 +1,19 @@
+{
+  "keybinding.autofishplus.enabled": "Переключить AutoFish+",
+  "keybinding.autofishplus.open_config": "Открыть настройки AutoFish+",
+  "key.category.autofishplus.autofish": "AutoFish+",
+  "config.autofishplus.title": "Настройки AutoFish+",
+  "config.autofishplus.general": "Основное",
+  "config.autofishplus.enabled": "Авторыбалка",
+  "config.autofishplus.enabled.tooltip": "Автоматически подсекает рыбу и снова забрасывает удочку после задержки.",
+  "config.autofishplus.recast_delay": "Пауза перед забросом",
+  "config.autofishplus.recast_delay.tooltip": "Задержка между подсечкой и повторным забросом удочки.",
+  "config.autofishplus.recast_delay_seconds": "сек",
+  "config.autofishplus.dont_night_fishing": "Пауза ночью",
+  "config.autofishplus.dont_night_fishing.tooltip": "Останавливает авторыбалку, когда снаружи темно.",
+  "config.autofishplus.replace_rod": "Запасная удочка",
+  "config.autofishplus.replace_rod.tooltip": "Перекладывает запасную удочку в выбранный слот, когда текущая ломается.",
+  "config.autofishplus.done": "Сохранить",
+  "actionbar.autofishplus.on": "включено",
+  "actionbar.autofishplus.off": "выключено"
+}

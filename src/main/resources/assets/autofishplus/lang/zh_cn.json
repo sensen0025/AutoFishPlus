@@ -1,0 +1,23 @@
+{
+  "keybinding.autofishplus.enabled": "开启/关闭自动钓鱼",
+  "keybinding.autofishplus.open_config": "打开自动钓鱼设置",
+  "key.category.autofishplus.autofish": "AutoFish+",
+  "config.autofishplus.title": "AutoFish+ 设置",
+  "config.autofishplus.general": "常规",
+  "config.autofishplus.enabled": "自动钓鱼",
+  "config.autofishplus.enabled.tooltip": "鱼上钩时自动收杆，并在延迟后重新抛竿。",
+  "config.autofishplus.recast_delay": "抛竿基准延迟",
+  "config.autofishplus.recast_delay.tooltip": "收杆与再次抛竿之间的基准时间间隔。",
+  "config.autofishplus.recast_delay_seconds": "秒",
+  "config.autofishplus.antiban": "防封人手拟真",
+  "config.autofishplus.antiban.tooltip": "模拟真实人类反应时间（基于Ex-Gaussian非正态长尾偏态分布）与自然抛竿抖动。",
+  "config.autofishplus.mouse_jitter": "点击微抖动模拟",
+  "config.autofishplus.mouse_jitter.tooltip": "模拟真实手指按压鼠标按键时的极微小视角偏移，防止长时间绝对静止被检测。",
+  "config.autofishplus.dont_night_fishing": "夜间暂停",
+  "config.autofishplus.dont_night_fishing.tooltip": "天黑时暂停自动钓鱼。",
+  "config.autofishplus.replace_rod": "断杆自动替换",
+  "config.autofishplus.replace_rod.tooltip": "钓鱼竿耗尽损坏时自动将备用鱼竿移入快捷栏。",
+  "config.autofishplus.done": "保存并关闭",
+  "actionbar.autofishplus.on": "已启用",
+  "actionbar.autofishplus.off": "已停用"
+}
