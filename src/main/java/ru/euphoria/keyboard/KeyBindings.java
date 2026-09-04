@@ -73,15 +73,15 @@ public final class KeyBindings {
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("run").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("start").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("auto").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("stop").executes(ctx -> {
@@ -104,15 +104,15 @@ public final class KeyBindings {
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("run").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("start").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("auto").executes(ctx -> {
-                        ru.euphoria.tools.AutoMacro.INSTANCE.start();
+                        ru.euphoria.tools.AutoMacro.sendOverlay(Minecraft.getInstance(), "§e[AutoFish+] §c/af run 宏寻路已屏蔽。所有功能（自动钓鱼 + 神话鱼QTE + Anti-AFK）已并入默认 J 键一键启闭！");
                         return 1;
                     }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("stop").executes(ctx -> {
@@ -138,15 +138,13 @@ public final class KeyBindings {
         ConfigManager.INSTANCE.getConfig().setEnabled(newEnabled);
         ConfigManager.INSTANCE.saveConfig();
 
-        MutableComponent status = newEnabled ?
-            Component.translatable("actionbar.autofishplus.on").withStyle(ChatFormatting.GREEN) :
-            Component.translatable("actionbar.autofishplus.off").withStyle(ChatFormatting.RED);
-
-        MutableComponent message = Component.literal("AutoFish+ ").withStyle(ChatFormatting.GOLD)
-            .append(Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY))
-            .append(status);
-
-        AutoMacro.sendOverlay(client, message);
+        if (newEnabled) {
+            ru.euphoria.tools.AutoMacro.INSTANCE.startFishingMode(client, player);
+            ru.euphoria.tools.AutoMacro.sendOverlay(client, "§6AutoFish+ • §a已开启 (自动钓鱼 + 神话鱼QTE + Anti-AFK)");
+        } else {
+            ru.euphoria.tools.AutoMacro.INSTANCE.stop();
+            ru.euphoria.tools.AutoMacro.sendOverlay(client, "§6AutoFish+ • §c已关闭");
+        }
     }
 
     public static void openConfig(Minecraft client) {

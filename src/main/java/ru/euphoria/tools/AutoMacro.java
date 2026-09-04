@@ -65,11 +65,31 @@ public final class AutoMacro {
 
     public void start() {
         Minecraft client = Minecraft.getInstance();
-        this.state = MacroState.CHECK_ROD;
+        if (client != null && client.player != null) {
+            startFishingMode(client, client.player);
+        }
+    }
+
+    public void startFishingMode(Minecraft client, LocalPlayer player) {
+        this.state = MacroState.FISHING;
         this.timer = 0;
         this.afkTimer = 0;
         this.noBobberTimer = 0;
-        sendOverlay(client, "§e[AutoFish+] §a自动化宏已启动！正在检查鱼竿...");
+        if (player != null) {
+            this.baseFishX = player.getX();
+            double pz = player.getZ();
+            if (Math.abs(pz - (-50.0)) < 3.0) {
+                this.baseFishZ = -50.0;
+            } else {
+                this.baseFishZ = pz;
+            }
+            player.setYRot(180.0f);
+            player.setXRot(28.0f);
+            equipFishingRod(client);
+            if (player.fishing == null) {
+                simulateRightClick(client, player);
+            }
+        }
     }
 
     public void stop() {
@@ -81,8 +101,6 @@ public final class AutoMacro {
         setKeyUp(client, false);
         setKeyDown(client, false);
         cancelBaritone(client);
-        ConfigManager.INSTANCE.getConfig().setEnabled(false);
-        sendOverlay(client, "§e[AutoFish+] §c自动化宏已停止！");
     }
 
     public void toggle() {
@@ -332,13 +350,10 @@ public final class AutoMacro {
                     equipFishingRod(client);
                 } else {
                     // 背包里彻底没鱼竿了（爆竿！）
-                    sendOverlay(client, "§e[AutoFish+] §c检测到鱼竿已损坏/爆竿！自动前往 NPC (22, 62, -36) 购买新鱼竿...");
+                    sendOverlay(client, "§e[AutoFish+] §c检测到鱼竿已损坏且背包已无可用鱼竿，已自动停止！");
+                    stop();
                     ConfigManager.INSTANCE.getConfig().setEnabled(false);
-                    sendBaritoneGoto(client, 22, 62, -36);
-                    this.state = MacroState.NAVIGATING_TO_NPC;
-                    this.timer = 0;
-                    this.afkTimer = 0;
-                    this.noBobberTimer = 0;
+                    ConfigManager.INSTANCE.saveConfig();
                     return;
                 }
             }
