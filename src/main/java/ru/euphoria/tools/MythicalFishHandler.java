@@ -11,7 +11,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.FishingHook;
 import ru.euphoria.config.ConfigManager;
 
 public final class MythicalFishHandler {
@@ -40,6 +39,7 @@ public final class MythicalFishHandler {
 
     public void init() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
+        System.out.println("[MythicalFish] Handler registered to END_CLIENT_TICK successfully!");
     }
 
     public boolean isFighting() {
@@ -78,7 +78,8 @@ public final class MythicalFishHandler {
                 }
             }
 
-            FishingHook bobber = player.fishing;
+            // 注意：使用 Entity 接收浮漂对象，确保 getX/Y/Z 准确映射至 Entity.method_23317 等 Intermediary 方法，防止 NoSuchMethodError 崩溃
+            Entity bobber = player.fishing;
             if (bobber == null) {
                 if (this.fighting) {
                     if (++this.ticksWithoutFish >= 20) {
@@ -187,7 +188,9 @@ public final class MythicalFishHandler {
                     }
                 }
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable t) {
+            System.err.println("[MythicalFish Error] " + t.getMessage());
+            t.printStackTrace();
         }
     }
 
