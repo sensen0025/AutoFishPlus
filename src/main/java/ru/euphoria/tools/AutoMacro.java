@@ -717,6 +717,31 @@ public final class AutoMacro {
         }
     }
 
+    public static void sendMessage(Minecraft client, String text) {
+        sendMessage(client, Component.literal(text));
+    }
+
+    public static void sendMessage(Minecraft client, Component component) {
+        if (client == null || client.player == null || component == null) return;
+        try {
+            for (Method m : client.player.getClass().getMethods()) {
+                if ((m.getName().equals("method_7353") || m.getName().equals("displayClientMessage") || m.getName().equals("sendMessage"))
+                        && m.getParameterCount() == 2 && m.getParameterTypes()[1] == boolean.class) {
+                    m.invoke(client.player, component, Boolean.FALSE);
+                    return;
+                }
+            }
+            for (Method m : client.player.getClass().getMethods()) {
+                if ((m.getName().equals("sendSystemMessage") || m.getName().equals("displayClientMessage"))
+                        && m.getParameterCount() == 1) {
+                    m.invoke(client.player, component);
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
     public static void sendOverlay(Minecraft client, String text) {
         sendOverlay(client, Component.literal(text));
     }
