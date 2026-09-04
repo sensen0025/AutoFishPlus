@@ -102,12 +102,12 @@ public final class MythicalFishHandler {
                 for (Entity entity : entities) {
                     if (entity == null || entity == player || entity == bobber) continue;
 
-                    // 纯坐标三维欧氏距离判定：限制在浮漂周围 5.0 格范围内
+                    // 纯坐标距离判定：限制在浮漂周围 8.0 格范围内 (8*8 = 64.0)
                     double dx = entity.getX() - bx;
                     double dy = entity.getY() - by;
                     double dz = entity.getZ() - bz;
                     double distSq = dx * dx + dy * dy + dz * dz;
-                    if (distSq > 25.0) continue; 
+                    if (distSq > 64.0) continue; 
 
                     String combined = getEntityCombinedText(entity);
                     if (combined.isEmpty()) continue;
