@@ -24,6 +24,7 @@ public final class MythicalFishHandler {
     private int clickTimer = 0;
     private int postFightRecastTimer = 0;
     private long lastNoticeTime = 0;
+    private long lastDebugProbeTime = 0;
     private String currentFishName = "";
 
     public enum FightPhase {
@@ -65,7 +66,7 @@ public final class MythicalFishHandler {
                     if (player.fishing == null && ConfigManager.INSTANCE.getConfig().getEnabled()) {
                         if (AutoMacro.INSTANCE.isActive()) {
                             player.setYRot(180.0f);
-                            player.setXRot(28.0f); // 调低 30 度
+                            player.setXRot(28.0f); // 俯角 28 度
                         }
                         MultiPlayerGameMode gm = client.gameMode;
                         if (gm != null) {
@@ -96,28 +97,41 @@ public final class MythicalFishHandler {
             int detectedPhase = 0; // 0: None/Unknown, 1: Green, 2: Red
             String detectedName = "";
             String detectedBarText = "";
+            double closestDist = 999.0;
+
+            long now = System.currentTimeMillis();
+            boolean shouldLogProbe = (now - this.lastDebugProbeTime >= 2000);
 
             Iterable<Entity> entities = client.level.entitiesForRendering();
             if (entities != null) {
                 for (Entity entity : entities) {
                     if (entity == null || entity == player || entity == bobber) continue;
 
-                    // 纯坐标距离判定：限制在浮漂周围 8.0 格范围内 (8*8 = 64.0)
                     double dx = entity.getX() - bx;
                     double dy = entity.getY() - by;
                     double dz = entity.getZ() - bz;
                     double distSq = dx * dx + dy * dy + dz * dz;
-                    if (distSq > 64.0) continue; 
+                    double hDistSq = dx * dx + dz * dz;
+
+                    // 检测范围扩大至 11 格 (11*11 = 121.0)
+                    // 兼容 3D 球体 11 格与水平圆柱 11 格（高低差允许 12 格）
+                    boolean inRange = (distSq <= 121.0) || (hDistSq <= 121.0 && Math.abs(dy) <= 12.0);
+                    if (!inRange) continue;
 
                     String combined = getEntityCombinedText(entity);
                     if (combined.isEmpty()) continue;
 
+                    double currentDist = Math.sqrt(distSq);
+
                     // 核心匹配：检测进度条特征或神话鱼名称
                     if (isProgressBar(combined) || isMythicalFish(combined)) {
                         foundFishEntity = true;
-                        detectedBarText = combined;
-                        if (detectedName.isEmpty() && isMythicalFish(combined)) {
-                            detectedName = extractFishName(combined);
+                        if (currentDist < closestDist) {
+                            closestDist = currentDist;
+                            detectedBarText = combined;
+                            if (isMythicalFish(combined)) {
+                                detectedName = extractFishName(combined);
+                            }
                         }
 
                         Component comp = getEntityComponent(entity);
@@ -127,8 +141,15 @@ public final class MythicalFishHandler {
                         } else if (p == 1 && detectedPhase != 2) {
                             detectedPhase = 1;
                         }
+                    } else if (shouldLogProbe && !this.fighting) {
+                        // 周期性调试探针：打印 11 格范围内尚未匹配到的带文本实体
+                        System.out.println("[MythicalFish-Probe] 浮漂周围11格内发现实体: [" + combined + "] 距离: " + String.format("%.2f", currentDist));
                     }
                 }
+            }
+
+            if (shouldLogProbe) {
+                this.lastDebugProbeTime = now;
             }
 
             if (foundFishEntity) {
@@ -139,7 +160,7 @@ public final class MythicalFishHandler {
                     this.fighting = true;
                     this.fightingTicks = 0;
                     this.currentFishName = detectedName.isEmpty() ? "神话鱼" : detectedName;
-                    System.out.println("[MythicalFish] 捕获到神话鱼拉扯进度条: [" + detectedBarText + "]");
+                    System.out.println("[MythicalFish] 捕获到神话鱼拉扯进度条: [" + detectedBarText + "] 距离: " + String.format("%.2f", closestDist));
                     sendOverlay(client, "§6[AutoFish+] §d发现 " + this.currentFishName + "！接管钓鱼 QTE 拉扯状态机！");
                 }
 
@@ -173,15 +194,20 @@ public final class MythicalFishHandler {
     private boolean isProgressBar(String text) {
         if (text == null || text.isEmpty()) return false;
         String trimmed = text.trim();
-        // 包含经典进度条符号
-        if (trimmed.contains("|") || trimmed.contains("■") || trimmed.contains("█") ||
+        // 包含经典进度条符号（ASCII、全角及 Unicode 块字符）
+        if (trimmed.contains("|") || trimmed.contains("｜") || trimmed.contains("丨") ||
+            trimmed.contains("■") || trimmed.contains("█") || trimmed.contains("▌") ||
+            trimmed.contains("▍") || trimmed.contains("▎") || trimmed.contains("▏") ||
+            trimmed.contains("▒") || trimmed.contains("▓") || trimmed.contains("░") ||
             trimmed.contains("❤") || trimmed.contains("%") || trimmed.contains("===") ||
-            trimmed.contains("---") || trimmed.contains("///")) {
+            trimmed.contains("---") || trimmed.contains("///") ||
+            trimmed.contains("IIIII") || trimmed.contains("lllll")) {
             return true;
         }
         String lower = trimmed.toLowerCase();
         if (lower.contains("reel") || lower.contains("stop") || lower.contains("pull") ||
-            lower.contains("hold") || lower.contains("hp:") || lower.contains("hp ")) {
+            lower.contains("hold") || lower.contains("hp:") || lower.contains("hp ") ||
+            lower.contains("收线") || lower.contains("停手") || lower.contains("拉扯")) {
             return true;
         }
         return false;
@@ -194,17 +220,17 @@ public final class MythicalFishHandler {
 
         if (text != null) {
             String lower = text.toLowerCase();
-            // 关键词直接判定
+            // 关键词直接判定（英文 + 中文）
             if (lower.contains("stop") || lower.contains("hold") || lower.contains("release") ||
                 lower.contains("停") || lower.contains("放") || lower.contains("断")) {
-                return 2;
+                redScore += 10;
             }
             if (lower.contains("reel") || lower.contains("pull") || lower.contains("click") ||
                 lower.contains("拉") || lower.contains("收")) {
-                return 1;
+                greenScore += 10;
             }
 
-            // 分析颜色代码
+            // 分析颜色代码和 style 属性
             int len = text.length();
             for (int i = 0; i < len - 1; i++) {
                 if (text.charAt(i) == '§') {
@@ -216,9 +242,15 @@ public final class MythicalFishHandler {
                     }
                 }
             }
+            if (lower.contains("color=red") || lower.contains("color=dark_red") || lower.contains("#ff5555") || lower.contains("#aa0000")) {
+                redScore += 5;
+            }
+            if (lower.contains("color=green") || lower.contains("color=dark_green") || lower.contains("#55ff55") || lower.contains("#00aa00")) {
+                greenScore += 5;
+            }
         }
 
-        // 分析 Component Style
+        // 分析 Component Style 树
         if (comp != null) {
             int[] compScores = countComponentColors(comp);
             greenScore += compScores[0];
@@ -226,7 +258,7 @@ public final class MythicalFishHandler {
         }
 
         if (redScore > 0 && redScore >= greenScore) {
-            return 2; // 红色
+            return 2; // 红色（最高优先级停手）
         }
         if (greenScore > 0 && greenScore > redScore) {
             return 1; // 绿色
@@ -246,10 +278,10 @@ public final class MythicalFishHandler {
                 int rgb = textColor.getValue();
                 int r = (rgb >> 16) & 0xFF;
                 int g = (rgb >> 8) & 0xFF;
-                if (r >= 160 && g <= 110) {
-                    red += 2;
-                } else if (g >= 160 && r <= 110) {
-                    green += 2;
+                if (r >= 150 && g <= 120) {
+                    red += 3;
+                } else if (g >= 150 && r <= 120) {
+                    green += 3;
                 }
             }
         }
@@ -270,15 +302,19 @@ public final class MythicalFishHandler {
         StringBuilder sb = new StringBuilder();
         try {
             for (Method m : entity.getClass().getMethods()) {
-                String name = m.getName();
-                if ((name.equals("method_5797") || name.equals("getCustomName") ||
-                     name.equals("method_5476") || name.equals("getDisplayName") ||
-                     name.equals("method_5477") || name.equals("getName")) && m.getParameterCount() == 0) {
+                if (m.getParameterCount() == 0 && Component.class.isAssignableFrom(m.getReturnType())) {
                     Object res = m.invoke(entity);
                     if (res instanceof Component comp) {
                         sb.append(comp.getString()).append(" ");
-                    } else if (res != null) {
-                        sb.append(res.toString()).append(" ");
+                        sb.append(comp.toString()).append(" ");
+                    }
+                } else if (m.getParameterCount() == 0 && String.class.isAssignableFrom(m.getReturnType())) {
+                    String name = m.getName();
+                    if (name.contains("Name") || name.contains("Text") || name.contains("String")) {
+                        Object res = m.invoke(entity);
+                        if (res != null) {
+                            sb.append(res.toString()).append(" ");
+                        }
                     }
                 }
             }
@@ -291,12 +327,13 @@ public final class MythicalFishHandler {
         if (entity == null) return null;
         try {
             for (Method m : entity.getClass().getMethods()) {
-                String name = m.getName();
-                if ((name.equals("method_5797") || name.equals("getCustomName") ||
-                     name.equals("method_5476") || name.equals("getDisplayName")) && m.getParameterCount() == 0) {
+                if (m.getParameterCount() == 0 && Component.class.isAssignableFrom(m.getReturnType())) {
                     Object res = m.invoke(entity);
                     if (res instanceof Component comp) {
-                        return comp;
+                        String s = comp.getString();
+                        if (isProgressBar(s) || isMythicalFish(s)) {
+                            return comp;
+                        }
                     }
                 }
             }
@@ -310,7 +347,7 @@ public final class MythicalFishHandler {
         MultiPlayerGameMode gameMode = client.gameMode;
         if (gameMode == null) return;
 
-        // 如果 AutoMacro 激活，锁定正北且调低 30 度的朝向 (Pitch 28.0)
+        // 如果 AutoMacro 激活，锁定正北且俯视水面的朝向 (Pitch 28.0)
         if (AutoMacro.INSTANCE.isActive()) {
             player.setYRot(180.0f);
             player.setXRot(28.0f);
@@ -372,7 +409,11 @@ public final class MythicalFishHandler {
                lower.contains("塞勒涅") ||
                lower.contains("宙斯") ||
                lower.contains("阿佛洛狄忒") ||
-               lower.contains("神话鱼");
+               lower.contains("代达罗斯") ||
+               lower.contains("日神") ||
+               lower.contains("余烬") ||
+               lower.contains("泰坦") ||
+               lower.contains("神话");
     }
 
     private String extractFishName(String text) {
@@ -380,7 +421,7 @@ public final class MythicalFishHandler {
         String lower = text.toLowerCase();
         if (lower.contains("archimedes") || lower.contains("daedalus") || lower.contains("阿基米德")) return "Archimedes";
         if (lower.contains("demeter") || lower.contains("德墨忒尔")) return "Demeter";
-        if (lower.contains("helios") || lower.contains("赫利俄斯")) return "Helios";
+        if (lower.contains("helios") || lower.contains("赫利俄斯") || lower.contains("日神") || lower.contains("余烬")) return "Helios";
         if (lower.contains("hades") || lower.contains("哈迪斯")) return "Hades";
         if (lower.contains("nyx") || lower.contains("倪克斯")) return "Nyx";
         if (lower.contains("selene") || lower.contains("塞勒涅")) return "Selene";
