@@ -72,7 +72,7 @@ public final class MythicalFishHandler {
                         if (gm != null) {
                             gm.useItem(player, InteractionHand.MAIN_HAND);
                             player.swing(InteractionHand.MAIN_HAND);
-                            sendOverlay(client, "§e[AutoFish+] §a神话鱼战斗完成！已自动重新抛竿，恢复挂机！");
+                            sendOverlay(client, "§e[AutoFish+] §b神话鱼战斗完成！已自动重新抛竿，恢复挂机！");
                         }
                     }
                 }
@@ -375,7 +375,7 @@ public final class MythicalFishHandler {
             if (now - this.lastNoticeTime >= 1000) {
                 this.lastNoticeTime = now;
                 System.out.println("[MythicalFish] 进度条绿色 -> 连点收线中！" + barText);
-                sendOverlay(client, "§a[神话鱼-" + this.currentFishName + "] 绿色进度条 (REEL) - 快速连点收线中...");
+                sendOverlay(client, "§b[神话鱼-" + this.currentFishName + "] 允许拉线 (REEL) - 快速连点收线中...");
             }
         }
     }
@@ -387,7 +387,7 @@ public final class MythicalFishHandler {
         this.clickTimer = 0;
         this.currentPhase = FightPhase.NONE;
         System.out.println("[MythicalFish] 战斗结束: " + reason);
-        sendOverlay(client, "§6[AutoFish+] §a神话鱼拉扯战斗结束 (" + reason + ")！1.2秒后自动补抛一竿恢复挂机！");
+        sendOverlay(client, "§6[AutoFish+] §b神话鱼拉扯战斗结束 (" + reason + ")！1.2秒后自动补抛一竿恢复挂机！");
         this.postFightRecastTimer = 25; // 1.25秒后自动重新抛竿
     }
 

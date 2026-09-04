@@ -162,7 +162,7 @@ public final class AutoMacro {
         if (hasFishingRod(player)) {
             equipFishingRod(client);
             sendBaritoneGoto(client, 36, 59, -50);
-            sendOverlay(client, "§e[AutoFish+] §a检测到已有鱼竿，前往钓鱼点 (36, 59, -50)...");
+            sendOverlay(client, "§e[AutoFish+] §b检测到已有鱼竿，前往钓鱼点 (36, 59, -50)...");
             this.state = MacroState.NAVIGATING_TO_FISHING;
             this.timer = 0;
         } else {
@@ -183,7 +183,7 @@ public final class AutoMacro {
             cancelBaritone(client);
             // 自动校准朝向 NPC（优先根据附近 NPC 实体坐标动态锁定，兜底朝向东偏正对 23, 62, -36）
             alignToNpc(client, player);
-            sendOverlay(client, "§e[AutoFish+] §a已到达 NPC 处，精确对准 NPC 交互打开商店...");
+            sendOverlay(client, "§e[AutoFish+] §b已到达 NPC 处，精确对准 NPC 交互打开商店...");
             this.state = MacroState.INTERACTING_WITH_NPC;
             this.timer = 0;
             return;
@@ -201,7 +201,7 @@ public final class AutoMacro {
 
         // 已经成功打开容器界面
         if (player.containerMenu != null && player.containerMenu != player.inventoryMenu) {
-            sendOverlay(client, "§e[AutoFish+] §aNPC 商店已打开，正在寻找并点击购买鱼竿...");
+            sendOverlay(client, "§e[AutoFish+] §bNPC 商店已打开，正在寻找并点击购买鱼竿...");
             this.state = MacroState.BUYING_ROD;
             this.timer = 0;
             return;
@@ -236,7 +236,7 @@ public final class AutoMacro {
         if (menu == null || menu == player.inventoryMenu) {
             // 容器意外关闭，检查是否已有鱼竿
             if (hasFishingRod(player)) {
-                sendOverlay(client, "§e[AutoFish+] §a已成功获取鱼竿！前往钓鱼点...");
+                sendOverlay(client, "§e[AutoFish+] §b已成功获取鱼竿！前往钓鱼点...");
                 equipFishingRod(client);
                 sendBaritoneGoto(client, 36, 59, -50);
                 this.state = MacroState.NAVIGATING_TO_FISHING;
@@ -254,7 +254,7 @@ public final class AutoMacro {
             int rodSlot = findRodSlotInContainer(menu);
             if (rodSlot != -1) {
                 clickContainerSlot(client, rodSlot);
-                sendOverlay(client, "§e[AutoFish+] §a已点击购买鱼竿！");
+                sendOverlay(client, "§e[AutoFish+] §b已点击购买鱼竿！");
             } else {
                 sendOverlay(client, "§e[AutoFish+] §c未在菜单中识别到鱼竿物品，重试中...");
             }
@@ -269,7 +269,7 @@ public final class AutoMacro {
         // 35 ticks 后检查背包
         if (this.timer >= 35) {
             if (hasFishingRod(player)) {
-                sendOverlay(client, "§e[AutoFish+] §a购买成功！前往钓鱼点 (36, 59, -50)...");
+                sendOverlay(client, "§e[AutoFish+] §b购买成功！前往钓鱼点 (36, 59, -50)...");
                 equipFishingRod(client);
                 sendBaritoneGoto(client, 36, 59, -50);
                 this.state = MacroState.NAVIGATING_TO_FISHING;
@@ -300,7 +300,7 @@ public final class AutoMacro {
             player.setXRot(28.0f);
 
             equipFishingRod(client);
-            sendOverlay(client, "§e[AutoFish+] §a已就位钓鱼点！朝北方抛竿，启动自动钓鱼！");
+            sendOverlay(client, "§e[AutoFish+] §b已就位钓鱼点！朝北方抛竿，启动自动钓鱼！");
 
             // 启动自动钓鱼
             ConfigManager.INSTANCE.getConfig().setEnabled(true);
@@ -441,7 +441,7 @@ public final class AutoMacro {
                 this.state = MacroState.FISHING;
                 this.timer = 0;
                 this.afkTimer = 0;
-                sendOverlay(client, "§e[AutoFish+] §a[Anti-AFK] 已安全回位，继续自动钓鱼！");
+                sendOverlay(client, "§e[AutoFish+] §b[Anti-AFK] 已安全回位，继续自动钓鱼！");
             }
         } else {
             setKeyUp(client, true);

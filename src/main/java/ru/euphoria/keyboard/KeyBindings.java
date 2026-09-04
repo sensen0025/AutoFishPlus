@@ -258,10 +258,10 @@ public final class KeyBindings {
 
     public static void showHelp(Minecraft client) {
         AutoMacro.sendMessage(client, "§6=== AutoFish+ 指令与按键指南 ===");
-        AutoMacro.sendMessage(client, "§a/af toggle §7- 切换自动钓鱼开/关 (与键盘 J 键完全等效)");
-        AutoMacro.sendMessage(client, "§a/af §7- 无参数快速切换开/关");
-        AutoMacro.sendMessage(client, "§a/af on §7/ §c/af off §7- 显式开启或关闭");
-        AutoMacro.sendMessage(client, "§a/af config §7- 打开详细功能配置界面");
+        AutoMacro.sendMessage(client, "§b/af toggle §7- 切换自动钓鱼开/关 (与键盘 J 键完全等效)");
+        AutoMacro.sendMessage(client, "§b/af §7- 无参数快速切换开/关");
+        AutoMacro.sendMessage(client, "§b/af on §7/ §c/af off §7- 显式开启或关闭");
+        AutoMacro.sendMessage(client, "§b/af config §7- 打开详细功能配置界面");
         AutoMacro.sendMessage(client, "§7已集成：自动钓鱼、神话鱼QTE（绿点红停）、原地防挂机移动(Anti-AFK)");
     }
 
@@ -272,7 +272,7 @@ public final class KeyBindings {
 
         boolean current = ConfigManager.INSTANCE.getConfig().getEnabled();
         if (current == enable) {
-            String stateStr = enable ? "§a开启" : "§c关闭";
+            String stateStr = enable ? "§b开启" : "§c关闭";
             AutoMacro.sendOverlay(client, "§6AutoFish+ • 状态已处于: " + stateStr);
             AutoMacro.sendMessage(client, "§6[AutoFish+] §7当前状态已处于: " + stateStr);
             return;
@@ -283,8 +283,8 @@ public final class KeyBindings {
 
         if (enable) {
             AutoMacro.INSTANCE.startFishingMode(client, player);
-            AutoMacro.sendOverlay(client, "§6AutoFish+ • §a已开启 (自动钓鱼 + 神话鱼QTE + Anti-AFK)");
-            AutoMacro.sendMessage(client, "§6[AutoFish+] §a已开启！(自动钓鱼 + 神话鱼QTE + 原地防挂机 Anti-AFK)");
+            AutoMacro.sendOverlay(client, "§6AutoFish+ • §b已开启 (自动钓鱼 + 神话鱼QTE + Anti-AFK)");
+            AutoMacro.sendMessage(client, "§6[AutoFish+] §b已开启！(自动钓鱼 + 神话鱼QTE + 原地防挂机 Anti-AFK)");
         } else {
             AutoMacro.INSTANCE.stop();
             AutoMacro.sendOverlay(client, "§6AutoFish+ • §c已关闭");
