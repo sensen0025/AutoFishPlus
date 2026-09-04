@@ -38,14 +38,14 @@ public final class AutoMacro {
 
     private static final double FISH_X = 36.5;
     private static final double FISH_Y = 59.0;
-    private static final double FISH_Z = -48.5;
+    private static final double FISH_Z = -60.5;
 
     private MacroState state = MacroState.IDLE;
     private int timer = 0;
     private int afkTimer = 0;
     private int noBobberTimer = 0;
     private double baseFishX = 36.5;
-    private double baseFishZ = -48.0;
+    private double baseFishZ = -60.0;
     private int rightClickCooldown = 0;
 
     private AutoMacro() {
@@ -143,8 +143,8 @@ public final class AutoMacro {
     private void handleCheckRod(Minecraft client, LocalPlayer player) {
         if (hasFishingRod(player)) {
             equipFishingRod(client);
-            sendBaritoneGoto(client, 36, 59, -48);
-            sendOverlay(client, "§e[AutoFish+] §a检测到已有鱼竿，前往钓鱼点 (36, 59, -48)...");
+            sendBaritoneGoto(client, 36, 59, -60);
+            sendOverlay(client, "§e[AutoFish+] §a检测到已有鱼竿，前往钓鱼点 (36, 59, -60)...");
             this.state = MacroState.NAVIGATING_TO_FISHING;
             this.timer = 0;
         } else {
@@ -220,7 +220,7 @@ public final class AutoMacro {
             if (hasFishingRod(player)) {
                 sendOverlay(client, "§e[AutoFish+] §a已成功获取鱼竿！前往钓鱼点...");
                 equipFishingRod(client);
-                sendBaritoneGoto(client, 36, 59, -48);
+                sendBaritoneGoto(client, 36, 59, -60);
                 this.state = MacroState.NAVIGATING_TO_FISHING;
                 this.timer = 0;
             } else {
@@ -251,9 +251,9 @@ public final class AutoMacro {
         // 35 ticks 后检查背包
         if (this.timer >= 35) {
             if (hasFishingRod(player)) {
-                sendOverlay(client, "§e[AutoFish+] §a购买成功！前往钓鱼点 (36, 59, -48)...");
+                sendOverlay(client, "§e[AutoFish+] §a购买成功！前往钓鱼点 (36, 59, -60)...");
                 equipFishingRod(client);
-                sendBaritoneGoto(client, 36, 59, -48);
+                sendBaritoneGoto(client, 36, 59, -60);
                 this.state = MacroState.NAVIGATING_TO_FISHING;
                 this.timer = 0;
             } else {
@@ -302,7 +302,7 @@ public final class AutoMacro {
 
         // 防卡死超时（45秒重发一次寻路指令）
         if (this.timer > 900) {
-            sendBaritoneGoto(client, 36, 59, -48);
+            sendBaritoneGoto(client, 36, 59, -60);
             this.timer = 0;
         }
     }
