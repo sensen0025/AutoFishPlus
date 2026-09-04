@@ -28,8 +28,8 @@ public final class MythicalFishHandler {
 
     public enum FightPhase {
         NONE,
-        GREEN_REEL, // 绿灯阶段：快速收线削减 HP
-        RED_STOP    // 红灯阶段：绝对停手防止过热爆竿
+        GREEN_REEL, // 绿灯阶段：进度条为绿色，快速连点削减 HP
+        RED_STOP    // 红灯阶段：进度条为红色，绝对停手防止过热爆竿/逃跑
     }
 
     private FightPhase currentPhase = FightPhase.NONE;
@@ -65,7 +65,7 @@ public final class MythicalFishHandler {
                     if (player.fishing == null && ConfigManager.INSTANCE.getConfig().getEnabled()) {
                         if (AutoMacro.INSTANCE.isActive()) {
                             player.setYRot(180.0f);
-                            player.setXRot(-2.0f);
+                            player.setXRot(28.0f); // 调低 30 度
                         }
                         MultiPlayerGameMode gm = client.gameMode;
                         if (gm != null) {
@@ -93,40 +93,39 @@ public final class MythicalFishHandler {
             double bz = bobber.getZ();
 
             boolean foundFishEntity = false;
-            boolean detectedRed = false;
-            boolean detectedGreen = false;
+            int detectedPhase = 0; // 0: None/Unknown, 1: Green, 2: Red
             String detectedName = "";
+            String detectedBarText = "";
 
             Iterable<Entity> entities = client.level.entitiesForRendering();
             if (entities != null) {
                 for (Entity entity : entities) {
                     if (entity == null || entity == player || entity == bobber) continue;
 
-                    // 纯坐标三维欧氏距离平方判定：稳定可靠，全版本一致，无任何临时对象与错误风险
+                    // 纯坐标三维欧氏距离判定：限制在浮漂周围 5.0 格范围内
                     double dx = entity.getX() - bx;
                     double dy = entity.getY() - by;
                     double dz = entity.getZ() - bz;
                     double distSq = dx * dx + dy * dy + dz * dz;
-                    if (distSq > 42.25) continue; // 限制在 6.5 格范围内
+                    if (distSq > 25.0) continue; 
 
                     String combined = getEntityCombinedText(entity);
                     if (combined.isEmpty()) continue;
 
-                    // 匹配神话鱼或战斗血条特征
-                    if (isMythicalFish(combined) || isFightIndicator(combined)) {
+                    // 核心匹配：检测进度条特征或神话鱼名称
+                    if (isProgressBar(combined) || isMythicalFish(combined)) {
                         foundFishEntity = true;
+                        detectedBarText = combined;
                         if (detectedName.isEmpty() && isMythicalFish(combined)) {
                             detectedName = extractFishName(combined);
                         }
 
                         Component comp = getEntityComponent(entity);
-
-                        // 阶段与颜色检测
-                        if (checkIsRed(comp, combined)) {
-                            detectedRed = true;
-                        }
-                        if (checkIsGreen(comp, combined)) {
-                            detectedGreen = true;
+                        int p = analyzeProgressColor(comp, combined);
+                        if (p == 2) {
+                            detectedPhase = 2; // 红灯最高优先级
+                        } else if (p == 1 && detectedPhase != 2) {
+                            detectedPhase = 1;
                         }
                     }
                 }
@@ -140,20 +139,21 @@ public final class MythicalFishHandler {
                     this.fighting = true;
                     this.fightingTicks = 0;
                     this.currentFishName = detectedName.isEmpty() ? "神话鱼" : detectedName;
+                    System.out.println("[MythicalFish] 捕获到神话鱼拉扯进度条: [" + detectedBarText + "]");
                     sendOverlay(client, "§6[AutoFish+] §d发现 " + this.currentFishName + "！接管钓鱼 QTE 拉扯状态机！");
                 }
 
-                // 状态仲裁：红灯最高优先级（绝对防爆竿原则，一旦有红色信号即停手）
-                if (detectedRed) {
+                // 状态仲裁：红灯最高优先级（绝对防爆竿/防脱线原则）
+                if (detectedPhase == 2) {
                     this.currentPhase = FightPhase.RED_STOP;
-                } else if (detectedGreen) {
+                } else if (detectedPhase == 1) {
                     this.currentPhase = FightPhase.GREEN_REEL;
                 } else {
                     // 未能完全确定时，默认保持停手（安全第一）
                     this.currentPhase = FightPhase.RED_STOP;
                 }
 
-                handleFightAction(client, player);
+                handleFightAction(client, player, detectedBarText);
 
                 // 超时保护（Hypixel 主大厅神话鱼战斗通常在 60 秒内结束，做 75 秒安全兜底）
                 if (this.fightingTicks > 1500) {
@@ -168,6 +168,101 @@ public final class MythicalFishHandler {
             }
         } catch (Throwable ignored) {
         }
+    }
+
+    private boolean isProgressBar(String text) {
+        if (text == null || text.isEmpty()) return false;
+        String trimmed = text.trim();
+        // 包含经典进度条符号
+        if (trimmed.contains("|") || trimmed.contains("■") || trimmed.contains("█") ||
+            trimmed.contains("❤") || trimmed.contains("%") || trimmed.contains("===") ||
+            trimmed.contains("---") || trimmed.contains("///")) {
+            return true;
+        }
+        String lower = trimmed.toLowerCase();
+        if (lower.contains("reel") || lower.contains("stop") || lower.contains("pull") ||
+            lower.contains("hold") || lower.contains("hp:") || lower.contains("hp ")) {
+            return true;
+        }
+        return false;
+    }
+
+    private int analyzeProgressColor(Component comp, String text) {
+        // 返回值: 1 = GREEN, 2 = RED, 0 = UNKNOWN
+        int redScore = 0;
+        int greenScore = 0;
+
+        if (text != null) {
+            String lower = text.toLowerCase();
+            // 关键词直接判定
+            if (lower.contains("stop") || lower.contains("hold") || lower.contains("release") ||
+                lower.contains("停") || lower.contains("放") || lower.contains("断")) {
+                return 2;
+            }
+            if (lower.contains("reel") || lower.contains("pull") || lower.contains("click") ||
+                lower.contains("拉") || lower.contains("收")) {
+                return 1;
+            }
+
+            // 分析颜色代码
+            int len = text.length();
+            for (int i = 0; i < len - 1; i++) {
+                if (text.charAt(i) == '§') {
+                    char c = Character.toLowerCase(text.charAt(i + 1));
+                    if (c == 'c' || c == '4') { // 红色
+                        redScore += 3;
+                    } else if (c == 'a' || c == '2') { // 绿色
+                        greenScore += 3;
+                    }
+                }
+            }
+        }
+
+        // 分析 Component Style
+        if (comp != null) {
+            int[] compScores = countComponentColors(comp);
+            greenScore += compScores[0];
+            redScore += compScores[1];
+        }
+
+        if (redScore > 0 && redScore >= greenScore) {
+            return 2; // 红色
+        }
+        if (greenScore > 0 && greenScore > redScore) {
+            return 1; // 绿色
+        }
+        return 0;
+    }
+
+    private int[] countComponentColors(Component comp) {
+        int green = 0;
+        int red = 0;
+        if (comp == null) return new int[]{0, 0};
+
+        Style style = comp.getStyle();
+        if (style != null) {
+            TextColor textColor = style.getColor();
+            if (textColor != null) {
+                int rgb = textColor.getValue();
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                if (r >= 160 && g <= 110) {
+                    red += 2;
+                } else if (g >= 160 && r <= 110) {
+                    green += 2;
+                }
+            }
+        }
+
+        List<Component> siblings = comp.getSiblings();
+        if (siblings != null && !siblings.isEmpty()) {
+            for (Component sib : siblings) {
+                int[] sub = countComponentColors(sib);
+                green += sub[0];
+                red += sub[1];
+            }
+        }
+        return new int[]{green, red};
     }
 
     private String getEntityCombinedText(Entity entity) {
@@ -210,15 +305,15 @@ public final class MythicalFishHandler {
         return null;
     }
 
-    private void handleFightAction(Minecraft client, LocalPlayer player) {
+    private void handleFightAction(Minecraft client, LocalPlayer player, String barText) {
         long now = System.currentTimeMillis();
         MultiPlayerGameMode gameMode = client.gameMode;
         if (gameMode == null) return;
 
-        // 如果 AutoMacro 激活，锁定正北朝向
+        // 如果 AutoMacro 激活，锁定正北且调低 30 度的朝向 (Pitch 28.0)
         if (AutoMacro.INSTANCE.isActive()) {
             player.setYRot(180.0f);
-            player.setXRot(-2.0f);
+            player.setXRot(28.0f);
         }
 
         if (this.currentPhase == FightPhase.RED_STOP) {
@@ -226,7 +321,8 @@ public final class MythicalFishHandler {
             this.clickTimer = 0;
             if (now - this.lastNoticeTime >= 1000) {
                 this.lastNoticeTime = now;
-                sendOverlay(client, "§c[神话鱼-" + this.currentFishName + "] 红色阶段 (STOP) - 立即停手！严防爆竿！");
+                System.out.println("[MythicalFish] 进度条红色 -> 立即停手！" + barText);
+                sendOverlay(client, "§c[神话鱼-" + this.currentFishName + "] 红色进度条 (STOP) - 立即停手！严防爆竿！");
             }
         } else if (this.currentPhase == FightPhase.GREEN_REEL) {
             // 绿灯阶段：以每 3 ticks 一次（~6.6 CPS）稳健快速削减神话鱼 HP
@@ -238,7 +334,8 @@ public final class MythicalFishHandler {
             }
             if (now - this.lastNoticeTime >= 1000) {
                 this.lastNoticeTime = now;
-                sendOverlay(client, "§a[神话鱼-" + this.currentFishName + "] 绿色阶段 (REEL) - 快速点按收线中...");
+                System.out.println("[MythicalFish] 进度条绿色 -> 连点收线中！" + barText);
+                sendOverlay(client, "§a[神话鱼-" + this.currentFishName + "] 绿色进度条 (REEL) - 快速连点收线中...");
             }
         }
     }
@@ -249,6 +346,7 @@ public final class MythicalFishHandler {
         this.ticksWithoutFish = 0;
         this.clickTimer = 0;
         this.currentPhase = FightPhase.NONE;
+        System.out.println("[MythicalFish] 战斗结束: " + reason);
         sendOverlay(client, "§6[AutoFish+] §a神话鱼拉扯战斗结束 (" + reason + ")！1.2秒后自动补抛一竿恢复挂机！");
         this.postFightRecastTimer = 25; // 1.25秒后自动重新抛竿
     }
@@ -289,95 +387,6 @@ public final class MythicalFishHandler {
         if (lower.contains("zeus") || lower.contains("宙斯")) return "Zeus";
         if (lower.contains("aphrodite") || lower.contains("阿佛洛狄忒")) return "Aphrodite";
         return "MythicalFish";
-    }
-
-    private boolean isFightIndicator(String text) {
-        if (text == null || text.isEmpty()) return false;
-        String lower = text.toLowerCase();
-        return lower.contains("reel") ||
-               lower.contains("stop") ||
-               lower.contains("pull") ||
-               lower.contains("hold") ||
-               lower.contains("tension") ||
-               lower.contains("heat") ||
-               lower.contains("|||") ||
-               lower.contains("■■■") ||
-               lower.contains("❤❤") ||
-               lower.contains("hp:") ||
-               lower.contains("hp ");
-    }
-
-    private boolean checkIsRed(Component comp, String text) {
-        if (text != null) {
-            String lower = text.toLowerCase();
-            if (lower.contains("§c") || lower.contains("§4")) {
-                if (lower.contains("stop") || lower.contains("hold") || lower.contains("release") || 
-                    lower.contains("|||") || lower.contains("■") || lower.contains("❤") || lower.contains("hp")) {
-                    return true;
-                }
-            }
-            if (lower.contains("stop") || lower.contains("hold") || lower.contains("release") ||
-                lower.contains("停") || lower.contains("放") || lower.contains("断")) {
-                return true;
-            }
-        }
-        if (comp != null) {
-            if (hasColor(comp, 180, 100, true)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean checkIsGreen(Component comp, String text) {
-        if (text != null) {
-            String lower = text.toLowerCase();
-            if (lower.contains("§a") || lower.contains("§2")) {
-                if (lower.contains("reel") || lower.contains("pull") || lower.contains("click") ||
-                    lower.contains("|||") || lower.contains("■") || lower.contains("❤") || lower.contains("hp")) {
-                    return true;
-                }
-            }
-            if (lower.contains("reel") || lower.contains("pull") || lower.contains("click") ||
-                lower.contains("拉") || lower.contains("收")) {
-                return true;
-            }
-        }
-        if (comp != null) {
-            if (hasColor(comp, 100, 180, false)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasColor(Component comp, int rThreshold, int gThreshold, boolean expectRed) {
-        if (comp == null) return false;
-        Style style = comp.getStyle();
-        if (style != null) {
-            TextColor textColor = style.getColor();
-            if (textColor != null) {
-                int rgb = textColor.getValue();
-                int r = (rgb >> 16) & 0xFF;
-                int g = (rgb >> 8) & 0xFF;
-                int b = rgb & 0xFF;
-                if (expectRed && r >= rThreshold && g <= gThreshold) {
-                    return true;
-                }
-                if (!expectRed && g >= gThreshold && r <= rThreshold) {
-                    return true;
-                }
-            }
-        }
-        List<Component> siblings = comp.getSiblings();
-        if (siblings != null && !siblings.isEmpty()) {
-            for (Component sib : siblings) {
-                if (hasColor(sib, rThreshold, gThreshold, expectRed)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private void sendOverlay(Minecraft client, String message) {

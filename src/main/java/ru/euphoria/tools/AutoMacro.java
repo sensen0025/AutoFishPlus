@@ -279,7 +279,7 @@ public final class AutoMacro {
 
             // 用户特别指定：超北方抛竿 (Yaw 180.0, Pitch -2.0 微仰平视)
             player.setYRot(180.0f);
-            player.setXRot(-2.0f);
+            player.setXRot(28.0f);
 
             equipFishingRod(client);
             sendOverlay(client, "§e[AutoFish+] §a已就位钓鱼点！朝北方抛竿，启动自动钓鱼！");
@@ -313,7 +313,7 @@ public final class AutoMacro {
             this.afkTimer = 0;
             this.noBobberTimer = 0;
             player.setYRot(180.0f);
-            player.setXRot(-2.0f);
+            player.setXRot(28.0f);
             return;
         }
 
@@ -321,7 +321,7 @@ public final class AutoMacro {
 
         // 钓鱼过程中始终锁定正北抛竿朝向 (Yaw 180.0, Pitch -2.0)
         player.setYRot(180.0f);
-        player.setXRot(-2.0f);
+        player.setXRot(28.0f);
 
         // 每 20 ticks（1秒）巡检一次鱼竿与装备状态
         if (this.timer % 20 == 0) {
@@ -350,7 +350,7 @@ public final class AutoMacro {
             // 持续约 2 秒 (40 ticks) 未检测到浮漂，立即重新朝正北校准并抛竿！
             if (this.noBobberTimer >= 40) {
                 player.setYRot(180.0f);
-                player.setXRot(-2.0f);
+                player.setXRot(28.0f);
                 equipFishingRod(client);
                 simulateRightClick(client, player);
                 this.noBobberTimer = 0;
@@ -366,7 +366,7 @@ public final class AutoMacro {
         if (this.afkTimer >= 700) {
             sendOverlay(client, "§e[AutoFish+] §b[Anti-AFK] 触发防挂机移动：后退1格并返回原地...");
             player.setYRot(180.0f);
-            player.setXRot(-2.0f);
+            player.setXRot(28.0f);
             setKeyDown(client, true);
             this.state = MacroState.AFK_STEP_BACK;
             this.timer = 0;
@@ -415,7 +415,7 @@ public final class AutoMacro {
 
                 // 重新锁定正北并微仰
                 player.setYRot(180.0f);
-                player.setXRot(-2.0f);
+                player.setXRot(28.0f);
 
                 // 保持手持鱼竿，若浮漂不在水中则重新抛竿
                 equipFishingRod(client);

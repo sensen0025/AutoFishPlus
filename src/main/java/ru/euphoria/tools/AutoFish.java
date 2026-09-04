@@ -119,7 +119,7 @@ public final class AutoFish {
         // 如果处于 AutoMacro 自动化宏模式，精准朝向正北方抛竿
         if (AutoMacro.INSTANCE.isActive()) {
             player.setYRot(180.0f);
-            player.setXRot(-2.0f);
+            player.setXRot(28.0f);
         } else if (ConfigManager.INSTANCE.getConfig().getAntiBan() && ConfigManager.INSTANCE.getConfig().getMouseJitter()) {
             HumanTiming.applyMouseMicroJitter(player);
         }
